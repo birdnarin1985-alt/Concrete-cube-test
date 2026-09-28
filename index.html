@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Causality & Fracture Matrix // Concrete Micro-Mechanics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --site-yellow: #f39c12;
+            --site-dark: #07090c;
+            --panel-bg: rgba(12, 16, 22, 0.94);
+            --concrete-gray: #95a5a6;
+            --hazard-red: #e74c3c;
+            --causality-cyan: #00ffcc;
+            --text-main: #f5f6fa;
+        }
+
+        body {
+            margin: 0;
+            background: var(--site-dark);
+            font-family: 'Sarabun', sans-serif;
+            color: var(--text-main);
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* โครงสร้างหน้าเอกสารนิตยสารสัดส่วน Golden Ratio (61.8% / 38.2%) */
+        .magazine-page {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            padding: 40px 6%;
+            box-sizing: border-box;
+            background: radial-gradient(circle at 15% 20%, #161f30 0%, #07090c 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .report-header {
+            max-width: 700px;
+            border-bottom: 2px solid rgba(243, 156, 18, 0.25);
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--site-yellow);
+            color: #000;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            letter-spacing: 1.5px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--site-yellow);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--concrete-gray);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 40px;
+            max-width: 1350px;
+            align-items: center;
+        }
+
+        p {
+            font-size: 13px;
+            line-height: 1.75;
+            color: #dcdde1;
+            margin-bottom: 12px;
+            font-weight: 300;
+        }
+
+        .math-box {
+            background: rgba(0, 0, 0, 0.7);
+            border-left: 3px solid var(--causality-cyan);
+            padding: 14px 18px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #74b9ff;
+        }
+
+        /* วิวพอร์ตจำลอง 3D Isometric Floating Stage */
+        .simulation-viewport {
+            position: relative;
+            width: 100%;
+            height: 440px;
+            background: radial-gradient(circle, rgba(20,28,38,0.9) 0%, rgba(8,11,15,0.98) 100%);
+            border: 1px solid rgba(243, 156, 18, 0.35);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.85), inset 0 0 30px rgba(0,0,0,0.5);
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            color: var(--causality-cyan);
+            background: rgba(0,0,0,0.6);
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(0,255,204,0.2);
+            pointer-events: none;
+        }
+
+        .control-dashboard {
+            margin-top: 12px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(243, 156, 18, 0.25);
+            padding: 14px 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--site-yellow);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .btn-preset {
+            flex: 1;
+            background: #1e272e;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 6px;
+            font-size: 10.5px;
+            font-family: 'JetBrains Mono', monospace;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-preset.active {
+            background: var(--site-yellow);
+            color: #000;
+            font-weight: bold;
+            border-color: var(--site-yellow);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-hammer {
+            flex: 2;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            border: none;
+            padding: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            font-size: 11px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            transition: transform 0.1s;
+        }
+        .btn-hammer:active { transform: scale(0.97); }
+
+        .btn-reset {
+            flex: 1;
+            background: #2f3640;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #status-display {
+            margin-top: 8px;
+            font-size: 10.5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            color: var(--causality-cyan);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="magazine-page">
+        <div class="report-header">
+            <span class="badge">[CONFIDENTIAL // LAB TEST REF: CC-2026-X]</span>
+            <h1>การวิเคราะห์ความล้มเหลวคอนกรีต: วัฏจักรแห่งเหตุปัจจัย</h1>
+            <div class="subtitle">Micro-Mechanics & Circular Linked List Simulation Engine</div>
+        </div>
+
+        <div class="content-grid">
+            <div class="text-column">
+                <p>รายงานชิ้นนี้จำลองพฤติกรรมโครงสร้างระดับจุลภาคของลูกบาศก์คอนกรีต ($15 \times 15 \times 15\text{ ซม.}$) ผ่านสถาปัตยกรรมข้อมูล <strong>Circular Linked List</strong> ที่ประมวลผลด้วยความเร็วระดับฮาร์ดแวร์ เพื่อศึกษาการลามของรอยร้าวตามกฎแห่งเหตุปัจจัย (*อิทัปปัจจยตา*)</p>
+
+                <div class="math-box">
+                    <strong>Idappaccayatā Mechanics Formulation:</strong><br>
+                    $$Imasmi\u014d\ sati\ ida\u1e43\ hoti \longrightarrow \sigma_{local} > f'_c$$
+<br>
+                    • เมื่อเกิดแรงกระแทกจากปลายนิ้ว (Hammer Impact) เหตุปัจจัยจะถูกส่งต่อไปยังวงล้อมเซลล์ข้างเคียง<br>
+                    • เกิดความเสียหายสะสม ($D$) จนถึงขีดจำกัด พันธะดับสลายและประกอบร่างใหม่ตามวัฏจักร
+                </div>
+
+                <p><strong>คำแนะนำการใช้งาน:</strong> คลิกหรือใช้นิ้วฟาดลงบนก้อนลูกบาศก์ลอยตัวทางขวา เพื่อจำลองค้อนกระแทก สังเกตการกระจายตัวของรอยร้าว และการประกอบร่างกลับมาใหม่โดยอัตโนมัติอย่างไร้รอยต่อ</p>
+            </div>
+
+            <div>
+                <div class="simulation-viewport" id="viewport">
+                    <div class="hud-overlay" id="hud-text">NODES: 0 | STATE: EQUILIBRIUM</div>
+                    <canvas id="engineCanvas"></canvas>
+                </div>
+
+                <div class="control-dashboard">
+                    <div class="control-title">
+                        <span>CONCRETE STRENGTH GRADE</span>
+                        <span>MODULUS ELASTICITY</span>
+                    </div>
+                    <div class="preset-buttons">
+                        <button class="btn-preset active" onclick="setGrade(180, this)">180 ksc</button>
+                        <button class="btn-preset" onclick="setGrade(240, this)">240 ksc</button>
+                        <button class="btn-preset" onclick="setGrade(280, this)">280 ksc</button>
+                    </div>
+
+                    <div class="action-row">
+                        <button class="btn-hammer" onclick="triggerHammerImpact()">⚡ ฟาดค้อนกระแทก (HAMMER IMPACT)</button>
+                        <button class="btn-reset" onclick="resetCube()">⟳ ประกอบร่างใหม่</button>
+                    </div>
+                    <div id="status-display">STATUS: พร้อมรับแรงกระแทก (Ready)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('engineCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusDisplay = document.getElementById('status-display');
+        const hudText = document.getElementById('hud-text');
+        const viewport = document.getElementById('viewport');
+
+        let currentGrade = 180;
+        let nodes = [];
+        let isBrokenState = false;
+        let idleAngle = 0;
+
+        // โครงสร้างโหนดวงกลม (Circular Linked Cell Node)
+        class CellNode {
+            constructor(x, y, z, type) {
+                this.ox = x; this.oy = y; this.oz = z; // Home position (Isometric)
+                this.x = x; this.y = y; this.z = z;
+                this.vx = 0; this.vy = 0; this.vz = 0;
+                this.type = type;
+                
+                if (type === 'rock') {
+                    this.radius = 6 + Math.random() * 4;
+                    this.color = '#7f8c8d';
+                    this.mass = 3.0;
+                } else if (type === 'sand') {
+                    this.radius = 2.2 + Math.random() * 1.5;
+                    this.color = '#d35400';
+                    this.mass = 1.5;
+                } else {
+                    this.radius = 1.1;
+                    this.color = '#bdc3c7';
+                    this.mass = 0.8;
+                }
+                this.neighbors = []; // Circular Linked Network Pointers
+                this.isBroken = false;
+            }
+
+            reset() {
+                this.x = this.ox; this.y = this.oy; this.z = this.oz;
+                this.vx = 0; this.vy = 0; this.vz = 0;
+                this.isBroken = false;
+            }
+        }
+
+        function initConcreteCube() {
+            nodes = [];
+            let size = 110;
+            let step = 16;
+
+            // สร้างโครงข่ายเซลล์ 3D Isometric Cube
+            for (let x = -size/2; x <= size/2; x += step) {
+                for (let y = -size/2; y <= size/2; y += step) {
+                    for (let z = -size/2; z <= size/2; z += step) {
+                        let type = 'paste';
+                        let r = Math.hypot(x, y, z);
+                        if (r < size * 0.35 && Math.random() > 0.4) type = 'rock';
+                        else if (Math.random() > 0.5) type = 'sand';
+
+                        // สุ่มจุดอ่อนตั้งต้นเล็กน้อย (Micro-voids ตามหลักอิทัปปัจจยตา)
+                        if (Math.random() > 0.08) {
+                            nodes.push(new CellNode(x, y, z, type));
+                        }
+                    }
+                }
+            }
+
+            // ผูกพันธะ Circular Linked List / Network ระหว่างโหนดใกล้เคียง
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    let dist = Math.hypot(nodes[i].ox - nodes[j].ox, nodes[i].oy - nodes[j].oy, nodes[i].oz - nodes[j].oz);
+                    if (dist < 22) {
+                        nodes[i].neighbors.push(nodes[j]);
+                    }
+                }
+            }
+
+            isBrokenState = false;
+            statusDisplay.innerText = `STATUS: กรีดเกรด ${currentGrade} ksc พร้อมใช้งาน`;
+            statusDisplay.style.color = "var(--causality-cyan)";
+            hudText.innerText = `NODES: ${nodes.length} | STATE: STABLE EQUILIBRIUM`;
+        }
+
+        function setGrade(grade, btn) {
+            currentGrade = grade;
+            document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            initConcreteCube();
+        }
+
+        // ฟังก์ชันค้อนฟาดกระแทก (Hammer Impact Force)
+        function triggerHammerImpact(customX, customY) {
+            isBrokenState = true;
+            statusDisplay.innerText = "STATUS: ⚡ ค้อนกระแทก! เกิดการแตกกระจายและลามรอยร้าว";
+            statusDisplay.style.color = "var(--hazard-red)";
+            hudText.innerText = `NODES: ${nodes.length} | STATE: FRACTURE CASCADE`;
+
+            let cx = canvas.width / 2;
+            let cy = canvas.height / 2;
+
+            nodes.forEach(node => {
+                // คำนวณจุดกระทบจากตำแหน่งเมาส์หรือจุดกึ่งกลาง
+                let impactX = customX !== undefined ? customX : cx;
+                let impactY = customY !== undefined ? customY : cy;
+                
+                let dx = node.x - impactX;
+                let dy = node.y - impactY;
+                let dist = Math.hypot(dx, dy);
+
+                let powerMultiplier = currentGrade === 280 ? 18 : (currentGrade === 240 ? 22 : 28);
+
+                // แรงกระแทกกระจายออกด้านข้างตามหลักโมเลกุล (Explosive Force)
+                node.vx += (dx / (dist + 5)) * (Math.random() * powerMultiplier + 5) + (Math.random() - 0.5) * 12;
+                node.vy += (dy / (dist + 5)) * (Math.random() * powerMultiplier + 5) + (Math.random() - 0.5) * 12;
+                node.vz += (Math.random() - 0.5) * 15;
+                node.isBroken = true;
+            });
+
+            // ตั้งเวลาอัตโนมัติเพื่อประกอบร่างใหม่ตามวัฏจักร (Self-Assembly / Regeneration)
+            setTimeout(() => {
+                resetCube();
+            }, 3500);
+        }
+
+        function resetCube() {
+            nodes.forEach(node => node.reset());
+            isBrokenState = false;
+            statusDisplay.innerText = "STATUS: ⟳ วัฏจักรเหตุปัจจัย: ประกอบร่างลูกบาศก์ใหม่สำเร็จ";
+            statusDisplay.style.color = "var(--causality-cyan)";
+            hudText.innerText = `NODES: ${nodes.length} | STATE: SELF-REGENERATED`;
+        }
+
+        // รองรับคลิกหรือใช้นิ้วฟาดบนวิวพอร์ต
+        viewport.addEventListener('click', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            triggerHammerImpact(x, y);
+        });
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        initConcreteCube();
+
+        // Isometric Projection Matrix
+        function project(x, y, z, cx, cy) {
+            let rad = idleAngle;
+            let cos = Math.cos(rad);
+            let sin = Math.sin(rad);
+
+            // หมุนรอบแกน Y ช้าๆ อย่างสง่างาม
+            let x1 = x * cos - z * sin;
+            let z1 = z * cos + x * sin;
+            let y1 = y;
+
+            // แปลงพิกัด Isometric 3D -> 2D Screen
+            let isoX = cx + (x1 - z1) * 0.707;
+            let isoY = cy + (x1 + z1) * 0.353 + y1;
+
+            return { x: isoX, y: isoY };
+        }
+
+        // Render Loop
+        function renderLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let cx = canvas.width / 2;
+            let cy = canvas.height / 2 + 20;
+
+            if (!isBrokenState) {
+                idleAngle += 0.006; // หมุนลอยๆ ช้าๆ กลางนิตยสาร
+            }
+
+            // วาดเงาตกกระทบบนหน้ากระดาษนิตยสาร (Drop Shadow)
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy + 95, 70, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // อัปเดตฟิสิกส์และการเคลื่อนที่ของโหนดใน Circular Linked List
+            nodes.forEach(node => {
+                if (isBrokenState) {
+                    node.x += node.vx;
+                    node.y += node.vy;
+                    node.z += node.vz;
+                    node.vy += 0.45; // แรงโน้มถ่วงดึงลงมากองบนนิตยสาร
+                    node.vx *= 0.96;
+                    node.vy *= 0.96;
+
+                    // จำกัดพื้นที่ไม่ให้ตกขอบหน้าจอเกินไป
+                    if (node.y > cy + 120) {
+                        node.y = cy + 120;
+                        node.vy *= -0.25; // เด้งดึ๋งเล็กน้อยตอนตกลงมากอง
+                        node.vx *= 0.8;
+                    }
+                } else {
+                    // ค่อยๆ ดึงกลับตำแหน่งเดิมอย่างนุ่มนวล (Spring Return)
+                    node.x += (node.ox - node.x) * 0.1;
+                    node.y += (node.oy - node.y) * 0.1;
+                    node.z += (node.oz - node.z) * 0.1;
+                }
+            });
+
+            // เรนเดอร์เส้นพันธะ Linked List (Bonds)
+            nodes.forEach(node => {
+                let p1 = project(node.x, node.y, node.z, cx, cy);
+                node.neighbors.forEach(neighbor => {
+                    if (!isBrokenState || Math.random() > 0.3) {
+                        let p2 = project(neighbor.x, neighbor.y, neighbor.z, cx, cy);
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        
+                        if (isBrokenState) {
+                            ctx.strokeStyle = 'rgba(231, 76, 60, 0.25)'; // แดงเตือนเมื่อแตก
+                        } else {
+                            ctx.strokeStyle = 'rgba(149, 165, 166, 0.18)';
+                        }
+                        ctx.lineWidth = 0.6;
+                        ctx.stroke();
+                    }
+                });
+            });
+
+            // เรนเดอร์เม็ดอนุภาคโหนด (Nodes Particles)
+            nodes.forEach(node => {
+                let p = project(node.x, node.y, node.z, cx, cy);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, node.radius, 0, Math.PI * 2);
+                ctx.fillStyle = isBrokenState && node.type === 'rock' ? '#e74c3c' : node.color;
+                ctx.fill();
+            });
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        renderLoop();
+    </script>
+</body>
+</html>
